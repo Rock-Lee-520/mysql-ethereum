@@ -11,13 +11,14 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func main() {
+func main2() {
 	client, err := ethclient.Dial("https://cloudflare-eth.com")
+	//client, err := ethclient.Dial("https://127.0.0.1:8545")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	account := common.HexToAddress("0xAAB27b150451726EC7738aa1d0A94505c8729bd1")
+	account := common.HexToAddress("0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990")
 	balance, err := client.BalanceAt(context.Background(), account, nil)
 	if err != nil {
 		log.Fatal(err)

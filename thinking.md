@@ -1,3 +1,7 @@
+学习文档：
+https://goethereumbook.org/
+https://etherscan.io/
+
 
 ### 查询账户
 1、查询账户余额、代币余额， 
