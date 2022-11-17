@@ -1,13 +1,38 @@
-package main
+package client
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
+
+type Client interface {
+}
+
+var clientInstance *ClientSingleton
+
+type ClientSingleton struct {
+	once sync.Once
+}
+
+func (C *ClientSingleton) GetSingleton() *ClientSingleton {
+	C.once.Do(func() {
+		clientInstance = &ClientSingleton{}
+	})
+	return clientInstance
+}
+
+func (C *ClientSingleton) NewClient() *ethclient.Client {
+	client, err := ethclient.Dial("https://cloudflare-eth.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return client
+}
 
 func main() {
 	client, err := ethclient.Dial("https://cloudflare-eth.com")

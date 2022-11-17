@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"regexp"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -27,12 +28,12 @@ func (account *AccountSingleton) GetSingleton() *AccountSingleton {
 	return accountInstance
 }
 
-func (account *AccountSingleton) GetBalance(address string) string {
+func (account *AccountSingleton) GetBalance(address string, client *ethclient.Client) string {
 	//client, err := ethclient.Dial("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161")
-	client, err := ethclient.Dial("https://cloudflare-eth.com")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// client, err := ethclient.Dial("https://cloudflare-eth.com")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	accountAddress := common.HexToAddress(address)
 	balance, err := client.BalanceAt(context.Background(), accountAddress, nil)
@@ -51,33 +52,37 @@ func (account *AccountSingleton) GetBalance(address string) string {
 	return eth.String()
 }
 
-// func main2() {
-// 	client, err := ethclient.Dial("https://cloudflare-eth.com")
-// 	//client, err := ethclient.Dial("https://127.0.0.1:8545")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+func (account *AccountSingleton) CheckAddress(address string, client *ethclient.Client) bool {
+	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
 
-// 	account := common.HexToAddress("0xeE0D1B5aeAd1Ac95233e43D87413426BeF113C79")
-// 	balance, err := client.BalanceAt(context.Background(), account, nil)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println(balance) // 25893180161173005034
+	fmt.Printf("is valid: %v\n", re.MatchString(address)) // is valid: true
+	fmt.Printf("is valid: %v\n", re.MatchString(address)) // is valid: false
 
-// 	blockNumber := big.NewInt(15929513)
-// 	balanceAt, err := client.BalanceAt(context.Background(), account, blockNumber)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println(balanceAt) // 25729324269165216042
+	// client, err := ethclient.Dial("https://cloudflare-eth.com")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-// 	fbalance := new(big.Float)
-// 	fbalance.SetString(balanceAt.String())
-// 	ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(10)))
-// 	fmt.Println(ethValue) // 25.729324269165216041
+	// 0x Protocol Token (ZRX) smart contract address
+	addr := common.HexToAddress(address)
+	bytecode, err := client.CodeAt(context.Background(), addr, nil) // nil is latest block
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	pendingBalance, err := client.PendingBalanceAt(context.Background(), account)
-// 	fmt.Println(pendingBalance) // 25729324269165216042
+	isContract := len(bytecode) > 0
 
-// }
+	fmt.Printf("is contract: %v\n", isContract) // is contract: true
+
+	// a random user account address
+	addr = common.HexToAddress(address)
+	bytecode, err = client.CodeAt(context.Background(), addr, nil) // nil is latest block
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	isContract = len(bytecode) > 0
+
+	fmt.Printf("is contract: %v\n", isContract) // is contract: false
+	return isContract
+}
